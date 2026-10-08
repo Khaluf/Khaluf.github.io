@@ -31,7 +31,8 @@ def via_serpapi(key):
         if len(a) < 100:
             break
         start += 100
-    return {"pubs_per_year": dict(sorted(ppy.items())), "citations": vals["citations"][0], "citations_since": vals["citations"][1],
+    cpy = {str(g["year"]): g["citations"] for g in r.json()["cited_by"].get("graph", [])}
+    return {"cites_per_year": dict(sorted(cpy.items())), "pubs_per_year": dict(sorted(ppy.items())), "citations": vals["citations"][0], "citations_since": vals["citations"][1],
             "h_index": vals["h_index"][0], "h_index_since": vals["h_index"][1],
             "i10_index": vals["i10_index"][0], "i10_index_since": vals["i10_index"][1],
             "since": vals["since"]}
@@ -45,7 +46,8 @@ def via_scholarly():
         y = str(p.get("bib", {}).get("pub_year") or "").strip()
         if y.isdigit():
             ppy[y] = ppy.get(y, 0) + 1
-    return {"pubs_per_year": dict(sorted(ppy.items())), "citations": a["citedby"], "citations_since": a["citedby5y"],
+    cpy = {str(k): v for k, v in (a.get("cites_per_year") or {}).items()}
+    return {"cites_per_year": dict(sorted(cpy.items())), "pubs_per_year": dict(sorted(ppy.items())), "citations": a["citedby"], "citations_since": a["citedby5y"],
             "h_index": a["hindex"], "h_index_since": a["hindex5y"],
             "i10_index": a["i10index"], "i10_index_since": a["i10index5y"],
             "since": datetime.date.today().year - 5}
